@@ -23,4 +23,6 @@ public class Arcade {
     private Integer arcadeStatus;
 
     private Integer winCount;
+
+    private String queueName;
 }

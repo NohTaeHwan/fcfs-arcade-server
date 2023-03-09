@@ -27,6 +27,8 @@ public class ArcadeWinner {
     @JoinColumn(name = "user_id")
     private User user;
 
+
+
     private LocalDateTime applyDate;
 
     private LocalDateTime winDate;

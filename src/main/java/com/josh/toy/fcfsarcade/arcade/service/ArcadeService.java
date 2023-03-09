@@ -6,6 +6,7 @@ import com.josh.toy.fcfsarcade.common.exception.ArcadeException;
 import com.josh.toy.fcfsarcade.common.exception.BusinessException;
 import com.josh.toy.fcfsarcade.common.exception.EntityNotFoundException;
 import com.josh.toy.fcfsarcade.common.exception.ErrorCode;
+import com.josh.toy.fcfsarcade.scheduler.PopScheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +38,7 @@ public class ArcadeService {
 
     private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
     private final TaskScheduler taskScheduler;
+    private final PopScheduler popScheduler;
 
     @Transactional
     public void openArcade(Long arcadeId){
@@ -54,14 +56,7 @@ public class ArcadeService {
         // 아케이드 시작
         arcadeRepository.startArcade(arcade.getId(),queueName);
 
-        ScheduledFuture<?> task = taskScheduler.scheduleAtFixedRate(
-                ()->{
-                    //TODO arcade_winner에 데이터 추가하는 쿼리
-                    //TODO 스케쥴러 종료하는 조건 로직 추가
-                    Set<?> queueSet = arcadeRedisTemplate.opsForZSet().range(queueName,0,10);
-                    queueSet.forEach(element->log.info("queue data : ={}",element));
-
-                },3000);
+        popScheduler.startScheduling(arcadeId);
 
     }
 

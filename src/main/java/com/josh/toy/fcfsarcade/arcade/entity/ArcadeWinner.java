@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="arcade")
+@Table(name="arcade_winner")
 public class ArcadeWinner {
 
     @Id
@@ -28,8 +28,9 @@ public class ArcadeWinner {
     private User user;
 
 
+    private LocalDateTime winDate;
 
     private LocalDateTime applyDate;
 
-    private LocalDateTime winDate;
+
 }

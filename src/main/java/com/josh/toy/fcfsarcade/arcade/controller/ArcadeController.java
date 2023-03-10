@@ -15,7 +15,6 @@ public class ArcadeController {
     @PostMapping("/open/{arcadeId}")
     public ApiResponse<String> openArcade(@PathVariable Long arcadeId){
 
-        //TODO 만든 해시값을 WaitQueue 이름에 사용
         arcadeService.openArcade(arcadeId);
 
         return ApiResponse.succ("Open Arcade OK");
@@ -24,6 +23,7 @@ public class ArcadeController {
     @PostMapping("/queue/{userId}")
     public ApiResponse<String> playArcadeWithQueue(@PathVariable Long userId){
 
+        //TODO 유저 중복체크 로직 추가
 
         return ApiResponse.succ("play Arcade OK");
     }

@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface ArcadeRepository extends JpaRepository<Arcade,Long> {
 
     @Modifying
-    @Query(value = "update arcade set arcade_status = 1,queue_name = :queueName  where id = :arcadeId and arcade_status = 0",nativeQuery = true)
+    @Query(value = "update arcade set arcade_status = 0,queue_name = :queueName  where id = :arcadeId and arcade_status = 0",nativeQuery = true)
     void startArcade(@Param(value = "arcadeId") Long arcadeId,@Param(value = "queueName")String queueName);
 
     /*@Modifying

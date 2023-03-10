@@ -12,7 +12,7 @@ public class SchedulerConfig {
     public TaskScheduler poolScheduler(){
         ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
         threadPoolTaskScheduler.setPoolSize(Runtime.getRuntime().availableProcessors() * 2);
-        threadPoolTaskScheduler.setThreadNamePrefix("queue-scheduler");
+        threadPoolTaskScheduler.setThreadNamePrefix("my-scheduler");
         threadPoolTaskScheduler.initialize();
         return threadPoolTaskScheduler;
     }

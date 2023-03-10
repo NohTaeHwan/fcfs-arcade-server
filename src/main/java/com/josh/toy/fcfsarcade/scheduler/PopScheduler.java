@@ -40,41 +40,51 @@ public class PopScheduler {
     public void startScheduling(Long arcadeId) {
 
         log.info("[={}] Start Scheduling... ",arcadeId);
+        // TODO scheduledFuture를 Map에 넣어서 multiple Queue 처리 필요
         scheduledFuture = taskScheduler.scheduleAtFixedRate(
                 ()->{
                     Arcade arcade = arcadeRepository.findById(arcadeId).orElseThrow(EntityNotFoundException::new);
 
-                    // QueueName or Id 으로 검색해서 winCount == winner_count 비교
+                    /* QueueName or Id 으로 검색해서 winCount == winner_count 비교 */
+                    // FIXME 이러면 save()중일때 getWinnerCount가 접근되어서 동시성에 문제가 생길거 같음
                     if (arcade.getWinCount().equals(arcadeWinnerRepository.getWinnerCount(arcadeId))){
-                        System.out.println("Stopping scheduling...");
+
+                        log.info("Stopping scheduling...");
                         scheduledFuture.cancel(true);
                     }
 
 
                     if(!scheduledFuture.isCancelled()){
-                        //TODO queue에서 데이터 가져오기 ( popMin()으로 변경 )
-                        //arcadeRedisTemplate.opsForZSet().popMin(arcade.getQueueName()).getScore();
-                        Set<ZSetOperations.TypedTuple<Long>> queueSet = arcadeRedisTemplate.opsForZSet().popMin(arcade.getQueueName(),5);
-                        //Set<?> queueSet = arcadeRedisTemplate.opsForZSet().range(arcade.getQueueName(),0,10);
+                        //TODO queue에서 데이터 가져오는 부분 상수로 처리
+                        //Set<ZSetOperations.TypedTuple<Long>> queueSet = arcadeRedisTemplate.opsForZSet().popMin(arcade.getQueueName(),5);
+                        // TODO popMin으로 변경해서 처리
+                        Set<ZSetOperations.TypedTuple<Long>> queueSet = arcadeRedisTemplate.opsForZSet().rangeByScoreWithScores(arcade.getQueueName(),0,5);
 
-                        //TODO arcade_winner에 데이터 추가하는 쿼리 + 중복 유저는 추가되면 안됨
+                        //TODO TypedTuple null 체크
                         queueSet.forEach(element->{
-                            User user = userRepository.findById(element.getValue()).orElseThrow(EntityNotFoundException::new);
+
+                            // redis ZSet에서 값 조회할때 정수를 Integer로 인식하는 이슈때문에 캐스팅 작업 필요
+                            Object redisValue = element.getValue();
+                            Long userId = ((Integer)redisValue).longValue();
+
+                            User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+
                             //TODO 코드 변경후에는 popMin() 에서 가져온 getScore()로 applyDate 등록
                             ArcadeWinner arcadeWinner = ArcadeWinner.builder()
                                     .arcade(arcade)
                                     .user(user)
-                                    .applyDate(LocalDateTime.now())
                                     .winDate(LocalDateTime.now())
+                                    .applyDate(LocalDateTime.now())
                                     .build();
 
-                            arcadeWinnerRepository.save(arcadeWinner);
 
+                            ArcadeWinner completeEntity =  arcadeWinnerRepository.save(arcadeWinner);
+                            log.info("save complete.. {}",completeEntity);
                         });
 
 
                     }
-                },2000);
+                },3000);
     }
 
 

@@ -19,7 +19,7 @@ spring:
     #   generate-ddl: true
     #    ?? : https://ykh6242.tistory.com/102
     open-in-view: false
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
         format_sql: true # ?????? sql? ?? ?? ??

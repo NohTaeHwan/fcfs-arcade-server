@@ -7,6 +7,7 @@ import com.josh.toy.fcfsarcade.arcade.repository.ArcadeRepository;
 import com.josh.toy.fcfsarcade.arcade.repository.ArcadeWinnerRepository;
 import com.josh.toy.fcfsarcade.arcade.repository.UserRepository;
 import com.josh.toy.fcfsarcade.common.exception.EntityNotFoundException;
+import com.josh.toy.fcfsarcade.common.exception.RedisZSetNullException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,8 +16,10 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -58,30 +61,32 @@ public class PopScheduler {
                         //TODO queue에서 데이터 가져오는 부분 상수로 처리
                         //Set<ZSetOperations.TypedTuple<Long>> queueSet = arcadeRedisTemplate.opsForZSet().popMin(arcade.getQueueName(),5);
                         // TODO popMin으로 변경해서 처리
-                        Set<ZSetOperations.TypedTuple<Long>> queueSet = arcadeRedisTemplate.opsForZSet().rangeByScoreWithScores(arcade.getQueueName(),0,5);
+                        Set<ZSetOperations.TypedTuple<Long>> userIdSet = arcadeRedisTemplate.opsForZSet().rangeByScoreWithScores(arcade.getQueueName(),0,5);
 
-                        //TODO TypedTuple null 체크
-                        queueSet.forEach(element->{
+                        /* redis zSet data null check */
+                        if(userIdSet == null){
+                            throw new RedisZSetNullException();
+                        }
 
-                            // redis ZSet에서 값 조회할때 정수를 Integer로 인식하는 이슈때문에 캐스팅 작업 필요
+                        List<ArcadeWinner> insertDataList = userIdSet.stream().map(element->{
                             Object redisValue = element.getValue();
                             Long userId = ((Integer)redisValue).longValue();
 
                             User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
 
                             //TODO 코드 변경후에는 popMin() 에서 가져온 getScore()로 applyDate 등록
-                            ArcadeWinner arcadeWinner = ArcadeWinner.builder()
+                            return ArcadeWinner.builder()
                                     .arcade(arcade)
                                     .user(user)
                                     .winDate(LocalDateTime.now())
                                     .applyDate(LocalDateTime.now())
                                     .build();
+                        }).collect(Collectors.toList());
 
-
-                            ArcadeWinner completeEntity =  arcadeWinnerRepository.save(arcadeWinner);
-                            log.info("save complete.. {}",completeEntity);
-                        });
-
+                        /* flush까지 해서 in-memory가 아닌 db에 바로 변경이 적용되도록 설정 */
+                        // NOTE 다만 매번 flush를 함으로써 생기는 성능 저하를 고려해야함.
+                        arcadeWinnerRepository.saveAllAndFlush(insertDataList);
+                        log.info("save complete.. {}",insertDataList);
 
                     }
                 },3000);

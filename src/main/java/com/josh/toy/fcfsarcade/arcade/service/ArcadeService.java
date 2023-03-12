@@ -61,9 +61,11 @@ public class ArcadeService {
 
         /* BUSINESS LOGIC */
         String queueName = "WAIT_QUEUE_"+arcadeId.hashCode();
+
         // 아케이드 시작
         arcadeRepository.startArcade(arcade.getId(),queueName);
 
+        // 큐 조회 스케쥴러 시작
         popScheduler.startScheduling(arcadeId);
 
     }
@@ -83,6 +85,8 @@ public class ArcadeService {
         Double score = arcadeRedisTemplate.opsForZSet().score(arcade.getQueueName(),userId);
         if(score==null){
             arcadeRedisTemplate.opsForZSet().add(arcade.getQueueName(),userId,System.currentTimeMillis());
+        }else{
+            throw new ArcadeException(ErrorCode.DUPLICATE_PLAY.value());
         }
 
     }

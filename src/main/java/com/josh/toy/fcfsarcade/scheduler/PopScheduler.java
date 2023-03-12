@@ -15,9 +15,11 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
@@ -44,12 +46,13 @@ public class PopScheduler {
 
         log.info("[={}] Start Scheduling... ",arcadeId);
         // TODO scheduledFuture를 Map에 넣어서 multiple Queue 처리 필요
+        // TODO save()중일때 getWinnerCount에 대한 동시성 이슈 처리.
+        // TODO period 및 접근 데이터 갯수 상수 처리
         scheduledFuture = taskScheduler.scheduleAtFixedRate(
                 ()->{
                     Arcade arcade = arcadeRepository.findById(arcadeId).orElseThrow(EntityNotFoundException::new);
 
                     /* QueueName or Id 으로 검색해서 winCount == winner_count 비교 */
-                    // FIXME 이러면 save()중일때 getWinnerCount가 접근되어서 동시성에 문제가 생길거 같음
                     if (arcade.getWinCount().equals(arcadeWinnerRepository.getWinnerCount(arcadeId))){
 
                         log.info("Stopping scheduling...");
@@ -58,10 +61,7 @@ public class PopScheduler {
 
 
                     if(!scheduledFuture.isCancelled()){
-                        //TODO queue에서 데이터 가져오는 부분 상수로 처리
-                        //Set<ZSetOperations.TypedTuple<Long>> queueSet = arcadeRedisTemplate.opsForZSet().popMin(arcade.getQueueName(),5);
-                        // TODO popMin으로 변경해서 처리
-                        Set<ZSetOperations.TypedTuple<Long>> userIdSet = arcadeRedisTemplate.opsForZSet().rangeByScoreWithScores(arcade.getQueueName(),0,5);
+                        Set<ZSetOperations.TypedTuple<Long>> userIdSet = arcadeRedisTemplate.opsForZSet().popMin(arcade.getQueueName(),5);
 
                         /* redis zSet data null check */
                         if(userIdSet == null){
@@ -74,14 +74,14 @@ public class PopScheduler {
 
                             User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
 
-                            //TODO 코드 변경후에는 popMin() 에서 가져온 getScore()로 applyDate 등록
                             return ArcadeWinner.builder()
                                     .arcade(arcade)
                                     .user(user)
                                     .winDate(LocalDateTime.now())
-                                    .applyDate(LocalDateTime.now())
+                                    .applyDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(element.getScore().longValue()), TimeZone.getDefault().toZoneId()))
                                     .build();
                         }).collect(Collectors.toList());
+
 
                         /* flush까지 해서 in-memory가 아닌 db에 바로 변경이 적용되도록 설정 */
                         // NOTE 다만 매번 flush를 함으로써 생기는 성능 저하를 고려해야함.

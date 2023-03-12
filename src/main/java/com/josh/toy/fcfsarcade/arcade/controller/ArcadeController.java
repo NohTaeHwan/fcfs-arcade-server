@@ -20,16 +20,17 @@ public class ArcadeController {
         return ApiResponse.succ("Open Arcade OK");
     }
 
-    @PostMapping("/queue/{userId}")
-    public ApiResponse<String> playArcadeWithQueue(@PathVariable Long userId){
+    @PostMapping("/queue")
+    public ApiResponse<String> playArcadeWithQueue(@RequestParam Long userId,
+                                                   @RequestParam Long arcadeId){
 
-        //TODO 유저 중복체크 로직 추가
+        arcadeService.playArcade(userId,arcadeId);
         return ApiResponse.succ("play Arcade OK");
     }
 
-    @PostMapping("/{userId}")
-    public ApiResponse<String> playArcade(@PathVariable Long userId){
-
+    @PostMapping("")
+    public ApiResponse<String> playArcade(@RequestParam Long userId,
+                                          @RequestParam Long arcadeId){
 
         return ApiResponse.succ("play Arcade OK");
     }

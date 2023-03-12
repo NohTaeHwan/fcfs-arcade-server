@@ -24,7 +24,6 @@ public class ArcadeController {
     public ApiResponse<String> playArcadeWithQueue(@PathVariable Long userId){
 
         //TODO 유저 중복체크 로직 추가
-
         return ApiResponse.succ("play Arcade OK");
     }
 

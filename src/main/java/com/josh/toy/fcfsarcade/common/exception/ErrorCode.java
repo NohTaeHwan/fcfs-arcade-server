@@ -363,7 +363,10 @@ public enum ErrorCode {
      * {@code 511 Network Authentication Required}.
      * @see <a href="http://tools.ietf.org/html/rfc6585#section-6">Additional HTTP Status Codes</a>
      */
-    NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required");
+    NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required"),
+
+
+    DUPLICATE_PLAY(-201,"Duplicate Play User ");
 
 
 

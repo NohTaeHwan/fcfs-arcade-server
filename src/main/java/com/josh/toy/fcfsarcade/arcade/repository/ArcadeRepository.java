@@ -16,4 +16,5 @@ public interface ArcadeRepository extends JpaRepository<Arcade,Long> {
     @Query(value = "update arcade set arcade_status = 2 where arcade_id = :#{arcadeId} and arcade_statue = 1",nativeQuery = true)
     void endArcade(Long arcadeId);*/
 
+
 }

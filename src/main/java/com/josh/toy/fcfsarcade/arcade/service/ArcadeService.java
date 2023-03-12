@@ -1,7 +1,11 @@
 package com.josh.toy.fcfsarcade.arcade.service;
 
 import com.josh.toy.fcfsarcade.arcade.entity.Arcade;
+import com.josh.toy.fcfsarcade.arcade.entity.ArcadeWinner;
+import com.josh.toy.fcfsarcade.arcade.entity.User;
 import com.josh.toy.fcfsarcade.arcade.repository.ArcadeRepository;
+import com.josh.toy.fcfsarcade.arcade.repository.ArcadeWinnerRepository;
+import com.josh.toy.fcfsarcade.arcade.repository.UserRepository;
 import com.josh.toy.fcfsarcade.common.exception.ArcadeException;
 import com.josh.toy.fcfsarcade.common.exception.BusinessException;
 import com.josh.toy.fcfsarcade.common.exception.EntityNotFoundException;
@@ -35,6 +39,10 @@ public class ArcadeService {
 
     private final ArcadeRepository arcadeRepository;
 
+    private final ArcadeWinnerRepository arcadeWinnerRepository;
+
+    private final UserRepository userRepository;
+
 
     private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
     private final TaskScheduler taskScheduler;
@@ -57,6 +65,25 @@ public class ArcadeService {
         arcadeRepository.startArcade(arcade.getId(),queueName);
 
         popScheduler.startScheduling(arcadeId);
+
+    }
+
+    public void playArcade(Long userId,Long arcadeId){
+
+        /* VALIDATION */
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+
+        Arcade arcade = arcadeRepository.findById(arcadeId).orElseThrow(EntityNotFoundException::new);
+
+        /* BUSINESS LOGIC */
+        if(arcadeWinnerRepository.existsArcadeWinnerByUserId(userId)){
+            throw new ArcadeException(ErrorCode.DUPLICATE_PLAY.value());
+        }
+
+        Double score = arcadeRedisTemplate.opsForZSet().score(arcade.getQueueName(),userId);
+        if(score==null){
+            arcadeRedisTemplate.opsForZSet().add(arcade.getQueueName(),userId,System.currentTimeMillis());
+        }
 
     }
 

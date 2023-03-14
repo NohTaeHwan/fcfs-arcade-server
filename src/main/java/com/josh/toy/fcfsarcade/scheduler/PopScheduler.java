@@ -10,6 +10,7 @@ import com.josh.toy.fcfsarcade.common.exception.EntityNotFoundException;
 import com.josh.toy.fcfsarcade.common.exception.RedisZSetNullException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.TaskScheduler;
@@ -32,6 +33,12 @@ public class PopScheduler {
     private ScheduledFuture<?> scheduledFuture;
     private final RedisTemplate<String,Long> arcadeRedisTemplate;
 
+    @Value(value = "${scheduler.process-period}")
+    private final String PROCESS_PERIOD;
+
+    @Value(value = "${scheduler.process-size}")
+    private final String PROCESS_SIZE;
+
     private final ArcadeWinnerRepository arcadeWinnerRepository;
     private final ArcadeRepository arcadeRepository;
 
@@ -47,7 +54,7 @@ public class PopScheduler {
         log.info("[={}] Start Scheduling... ",arcadeId);
         // TODO scheduledFuture를 Map에 넣어서 multiple Queue 처리 필요
         // TODO save()중일때 getWinnerCount에 대한 동시성 이슈 처리.
-        // TODO period 및 접근 데이터 갯수 상수 처리
+        // TODO 스케쥴러 종료 조건 (갯수 비교로 새로운 조건)
         scheduledFuture = taskScheduler.scheduleAtFixedRate(
                 ()->{
                     Arcade arcade = arcadeRepository.findById(arcadeId).orElseThrow(EntityNotFoundException::new);
@@ -56,12 +63,13 @@ public class PopScheduler {
                     if (arcade.getWinCount().equals(arcadeWinnerRepository.getWinnerCount(arcadeId))){
 
                         log.info("Stopping scheduling...");
+                        // TODO 아케이드 db 종료 처리
                         scheduledFuture.cancel(true);
                     }
 
 
                     if(!scheduledFuture.isCancelled()){
-                        Set<ZSetOperations.TypedTuple<Long>> userIdSet = arcadeRedisTemplate.opsForZSet().popMin(arcade.getQueueName(),5);
+                        Set<ZSetOperations.TypedTuple<Long>> userIdSet = arcadeRedisTemplate.opsForZSet().popMin(arcade.getQueueName(),Integer.parseInt(PROCESS_SIZE));
 
                         /* redis zSet data null check */
                         if(userIdSet == null){
@@ -89,7 +97,7 @@ public class PopScheduler {
                         log.info("save complete.. {}",insertDataList);
 
                     }
-                },3000);
+                },Integer.parseInt(PROCESS_PERIOD));
     }
 
 

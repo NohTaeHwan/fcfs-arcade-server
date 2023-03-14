@@ -28,6 +28,14 @@ public class ArcadeController {
         return ApiResponse.succ("play Arcade OK");
     }
 
+    @PostMapping("/queue")
+    public ApiResponse<String> closeArcade(@RequestParam Long userId,
+                                                   @RequestParam Long arcadeId){
+
+        arcadeService.playArcade(userId,arcadeId);
+        return ApiResponse.succ("play Arcade OK");
+    }
+
     @PostMapping("")
     public ApiResponse<String> playArcade(@RequestParam Long userId,
                                           @RequestParam Long arcadeId){

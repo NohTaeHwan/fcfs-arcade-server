@@ -34,5 +34,5 @@ spring:
   #session:
   #  store-type: jdbc
 scheduler:
-  process-interval: 3000
-  process-data: 50
+  process-period: 3000
+  process-size: 5

@@ -1,19 +1,16 @@
 package com.josh.toy.fcfsarcade.arcade.service;
 
 import com.josh.toy.fcfsarcade.arcade.entity.Arcade;
-import com.josh.toy.fcfsarcade.arcade.entity.ArcadeWinner;
 import com.josh.toy.fcfsarcade.arcade.entity.User;
 import com.josh.toy.fcfsarcade.arcade.repository.ArcadeRepository;
 import com.josh.toy.fcfsarcade.arcade.repository.ArcadeWinnerRepository;
 import com.josh.toy.fcfsarcade.arcade.repository.UserRepository;
 import com.josh.toy.fcfsarcade.common.exception.ArcadeException;
-import com.josh.toy.fcfsarcade.common.exception.BusinessException;
 import com.josh.toy.fcfsarcade.common.exception.EntityNotFoundException;
 import com.josh.toy.fcfsarcade.common.exception.ErrorCode;
 import com.josh.toy.fcfsarcade.scheduler.PopScheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
@@ -70,6 +67,7 @@ public class ArcadeService {
 
     }
 
+    @Transactional
     public void playArcade(Long userId,Long arcadeId){
 
         /* VALIDATION */
@@ -88,6 +86,27 @@ public class ArcadeService {
         }else{
             throw new ArcadeException(ErrorCode.DUPLICATE_PLAY.value());
         }
+
+    }
+
+    @Transactional
+    public void closeArcade(Long arcadeId){
+
+        /* VALIDATION */
+        Arcade arcade = arcadeRepository.findById(arcadeId).orElseThrow(EntityNotFoundException::new);
+
+        if(arcade.getArcadeStatus() == 0){
+            throw new ArcadeException(ErrorCode.NOT_OPEN_ARCADE.value());
+        }
+
+        if(arcade.getArcadeStatus() == 2){
+            throw new ArcadeException(ErrorCode.ARCADE_ALREADY_CLOSED.value());
+        }
+
+        /* BUSINESS LOGIC */
+
+
+
 
     }
 

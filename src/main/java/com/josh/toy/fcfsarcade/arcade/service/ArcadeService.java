@@ -6,6 +6,7 @@ import com.josh.toy.fcfsarcade.arcade.repository.ArcadeRepository;
 import com.josh.toy.fcfsarcade.arcade.repository.ArcadeWinnerRepository;
 import com.josh.toy.fcfsarcade.arcade.repository.UserRepository;
 import com.josh.toy.fcfsarcade.common.exception.ArcadeException;
+import com.josh.toy.fcfsarcade.common.exception.BusinessException;
 import com.josh.toy.fcfsarcade.common.exception.EntityNotFoundException;
 import com.josh.toy.fcfsarcade.common.exception.ErrorCode;
 import com.josh.toy.fcfsarcade.scheduler.PopScheduler;
@@ -105,8 +106,10 @@ public class ArcadeService {
 
         /* BUSINESS LOGIC */
 
+        // Arcade 종료 처리
+        arcadeRepository.endArcade(arcadeId).orElseThrow(ArcadeException::new);
 
-
+        popScheduler.stopScheduling();
 
     }
 

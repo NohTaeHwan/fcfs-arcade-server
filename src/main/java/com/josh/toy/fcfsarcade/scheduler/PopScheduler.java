@@ -33,11 +33,11 @@ public class PopScheduler {
     private ScheduledFuture<?> scheduledFuture;
     private final RedisTemplate<String,Long> arcadeRedisTemplate;
 
-    @Value(value = "${scheduler.process-period}")
-    private final String PROCESS_PERIOD;
+    @Value("${scheduler.process-period}")
+    private String PROCESS_PERIOD;
 
-    @Value(value = "${scheduler.process-size}")
-    private final String PROCESS_SIZE;
+    @Value("${scheduler.process-size}")
+    private String PROCESS_SIZE;
 
     private final ArcadeWinnerRepository arcadeWinnerRepository;
     private final ArcadeRepository arcadeRepository;
@@ -57,6 +57,7 @@ public class PopScheduler {
         // TODO 스케쥴러 종료 조건 (갯수 비교로 새로운 조건)
         scheduledFuture = taskScheduler.scheduleAtFixedRate(
                 ()->{
+
                     Arcade arcade = arcadeRepository.findById(arcadeId).orElseThrow(EntityNotFoundException::new);
 
                     /* QueueName or Id 으로 검색해서 winCount == winner_count 비교 */
@@ -98,6 +99,16 @@ public class PopScheduler {
 
                     }
                 },Integer.parseInt(PROCESS_PERIOD));
+    }
+
+    public void stopScheduling(){
+        if(!scheduledFuture.isCancelled()){
+            scheduledFuture.cancel(true);
+
+            log.info("Stopping scheduling...");
+
+        }
+
     }
 
 

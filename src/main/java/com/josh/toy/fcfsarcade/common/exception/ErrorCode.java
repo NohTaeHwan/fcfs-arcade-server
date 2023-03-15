@@ -366,11 +366,14 @@ public enum ErrorCode {
     NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required"),
 
 
+    ARCADE_ERROR(-200,"Arcade Exception"),
     DUPLICATE_PLAY(-201,"Duplicate Play User "),
 
     NOT_OPEN_ARCADE(-202,"Arcade is not opened"),
 
-    ARCADE_ALREADY_CLOSED(-203,"Arcade is already closed")
+    ARCADE_ALREADY_CLOSED(-203,"Arcade is already closed"),
+
+    END_ARCADE_ERROR(-204,"Arcade End Error"),
     ;
 
 

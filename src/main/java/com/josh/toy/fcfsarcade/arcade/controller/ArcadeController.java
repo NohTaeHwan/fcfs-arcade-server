@@ -28,11 +28,10 @@ public class ArcadeController {
         return ApiResponse.succ("play Arcade OK");
     }
 
-    @PostMapping("/queue")
-    public ApiResponse<String> closeArcade(@RequestParam Long userId,
-                                                   @RequestParam Long arcadeId){
+    @PostMapping("/close/{arcadeId}")
+    public ApiResponse<String> closeArcade(@PathVariable Long arcadeId){
 
-        arcadeService.playArcade(userId,arcadeId);
+        arcadeService.closeArcade(arcadeId);
         return ApiResponse.succ("play Arcade OK");
     }
 

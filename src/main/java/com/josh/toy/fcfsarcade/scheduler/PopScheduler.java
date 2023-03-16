@@ -11,11 +11,14 @@ import com.josh.toy.fcfsarcade.common.exception.RedisZSetNullException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.LockModeType;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,13 +51,16 @@ public class PopScheduler {
     /**
      *
      * TODO 큐에서 데이터 가져오는 스케쥴링 로직 완성 + 테스트
+     *        // TODO scheduledFuture를 Map에 넣어서 multiple Queue 처리 필요
+     *         // TODO save()중일때 getWinnerCount에 대한 동시성 이슈 처리.
+     *         // TODO 스케쥴러 종료 조건 (갯수 비교로 새로운 조건)
      */
+    @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     public void startScheduling(Long arcadeId) {
 
         log.info("[={}] Start Scheduling... ",arcadeId);
-        // TODO scheduledFuture를 Map에 넣어서 multiple Queue 처리 필요
-        // TODO save()중일때 getWinnerCount에 대한 동시성 이슈 처리.
-        // TODO 스케쥴러 종료 조건 (갯수 비교로 새로운 조건)
+
         scheduledFuture = taskScheduler.scheduleAtFixedRate(
                 ()->{
 

@@ -52,8 +52,8 @@ public class PopScheduler {
      *
      * TODO 큐에서 데이터 가져오는 스케쥴링 로직 완성 + 테스트
      *        // TODO scheduledFuture를 Map에 넣어서 multiple Queue 처리 필요
-     *         // TODO save()중일때 getWinnerCount에 대한 동시성 이슈 처리.
-     *         // TODO 스케쥴러 종료 조건 (갯수 비교로 새로운 조건)
+     *        // TODO save()중일때 getWinnerCount에 대한 동시성 이슈 처리.
+     *        // TODO 스케쥴러 종료 조건 (갯수 비교로 새로운 조건)
      */
     @Transactional
     @Lock(LockModeType.PESSIMISTIC_WRITE)

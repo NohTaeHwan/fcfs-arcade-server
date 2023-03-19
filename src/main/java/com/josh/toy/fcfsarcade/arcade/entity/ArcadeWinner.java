@@ -2,6 +2,7 @@ package com.josh.toy.fcfsarcade.arcade.entity;
 
 
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,7 +27,6 @@ public class ArcadeWinner {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
 
     private LocalDateTime winDate;
 

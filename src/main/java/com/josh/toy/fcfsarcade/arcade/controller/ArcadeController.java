@@ -24,7 +24,7 @@ public class ArcadeController {
     public ApiResponse<String> playArcadeWithQueue(@RequestParam Long userId,
                                                    @RequestParam Long arcadeId){
 
-        arcadeService.playArcade(userId,arcadeId);
+        arcadeService.playArcadeWithQueue(userId,arcadeId);
         return ApiResponse.succ("play Arcade OK");
     }
 
@@ -39,6 +39,7 @@ public class ArcadeController {
     public ApiResponse<String> playArcade(@RequestParam Long userId,
                                           @RequestParam Long arcadeId){
 
+        arcadeService.playArcade(userId,arcadeId);
         return ApiResponse.succ("play Arcade OK");
     }
 

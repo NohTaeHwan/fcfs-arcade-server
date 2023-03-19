@@ -1,6 +1,7 @@
 package com.josh.toy.fcfsarcade.arcade.service;
 
 import com.josh.toy.fcfsarcade.arcade.entity.Arcade;
+import com.josh.toy.fcfsarcade.arcade.entity.ArcadeWinner;
 import com.josh.toy.fcfsarcade.arcade.entity.User;
 import com.josh.toy.fcfsarcade.arcade.repository.ArcadeRepository;
 import com.josh.toy.fcfsarcade.arcade.repository.ArcadeWinnerRepository;
@@ -17,8 +18,11 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -69,7 +73,7 @@ public class ArcadeService {
     }
 
     @Transactional
-    public void playArcade(Long userId,Long arcadeId){
+    public void playArcadeWithQueue(Long userId,Long arcadeId){
 
         /* VALIDATION */
         User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
@@ -87,6 +91,36 @@ public class ArcadeService {
         }else{
             throw new ArcadeException(ErrorCode.DUPLICATE_PLAY.value());
         }
+
+    }
+
+    @Transactional
+    public void playArcade(Long userId, Long arcadeId){
+        /* VALIDATION */
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+
+        Arcade arcade = arcadeRepository.findById(arcadeId).orElseThrow(EntityNotFoundException::new);
+
+        if(arcadeWinnerRepository.existsArcadeWinnerByUserId(userId)){
+            throw new ArcadeException(ErrorCode.DUPLICATE_PLAY.value());
+        }
+
+        if(arcade.getCurrentWinnerCount().equals(arcade.getWinCount())){
+
+            arcadeRepository.endArcade(arcadeId);
+
+            throw new ArcadeException(ErrorCode.COUNT_LIMIT.value());
+        }
+
+        /* BUSINESS LOGIC */
+        ArcadeWinner arcadeWinner = ArcadeWinner.builder()
+                .arcade(arcade)
+                .user(user)
+                .winDate(LocalDateTime.now())
+                .applyDate(LocalDateTime.now())
+                .build();
+
+        arcadeWinnerRepository.save(arcadeWinner);
 
     }
 

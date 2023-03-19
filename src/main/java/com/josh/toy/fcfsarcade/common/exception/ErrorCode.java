@@ -368,12 +368,12 @@ public enum ErrorCode {
 
     ARCADE_ERROR(-200,"Arcade Exception"),
     DUPLICATE_PLAY(-201,"Duplicate Play User "),
-
     NOT_OPEN_ARCADE(-202,"Arcade is not opened"),
-
     ARCADE_ALREADY_CLOSED(-203,"Arcade is already closed"),
 
     END_ARCADE_ERROR(-204,"Arcade End Error"),
+
+    COUNT_LIMIT(-205,"Win Count Limit"),
     ;
 
 

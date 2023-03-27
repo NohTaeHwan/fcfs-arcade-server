@@ -49,5 +49,11 @@ public class ArcadeController {
         return ApiResponse.succ("TODO put service method");
     }
 
+    @GetMapping("/ngrinder")
+    public ApiResponse<String> ngrinderTest(){
+
+        return ApiResponse.succ("test success");
+    }
+
 
 }

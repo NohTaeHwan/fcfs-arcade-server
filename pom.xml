@@ -61,6 +61,11 @@
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
+<!--        <dependency>
+            <groupId>org.ngrinder</groupId>
+            <artifactId>ngrinder-core</artifactId>
+            <version>3.5.8</version>
+        </dependency>-->
     </dependencies>
 
     <build>
@@ -96,6 +101,11 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>ngrinder-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+
     </repositories>
     <pluginRepositories>
         <pluginRepository>

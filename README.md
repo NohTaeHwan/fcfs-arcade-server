@@ -12,4 +12,4 @@ _트래픽 처리에 중점을 두었기에 주제에서 벗어하는 불필요�
 
 
 **사용기술**
-- Java , Spring Boot, MySQL, JPA, Redis, ngrinder, maven, git
+- Java , Spring Boot, MySQL, JPA, Redis, maven, git
